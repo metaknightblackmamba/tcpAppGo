@@ -8,6 +8,9 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"path/filepath"
+	_ "image/jpeg"
+	_ "image/gif"
 )
 
 
@@ -38,7 +41,7 @@ func main() {
 		sendFileToServer(connection)
 		receiveFileFromServer(connection)
 
-		
+
 }
 
 
@@ -89,7 +92,7 @@ func receiveFileFromServer (connection net.Conn) {
 	gobDecoder.Decode(tmpstruct)
 
 	// On crée un nouveau fichier ayant comme nom "gray" suivi du nom du fichier entré au début
-	newFileName := "gray" + os.Args[2]
+	newFileName := "gray" + filepath.Base(os.Args[2]) + ".png"
   	newfile, err := os.Create(newFileName)
   	if err != nil {
   	    panic(err.Error())
