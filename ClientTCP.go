@@ -18,15 +18,15 @@ type imgStruct struct{
 
 func main() {
 
-			//On vérifie que l'utilisateur entre bien le bon nombre d'arguments
-			arguments := os.Args
-			if len(arguments) != 3 {
-							fmt.Println("Il faut les arguments adresse:port et chemin vers le fichier")
-							return
-			}
+		//On vérifie que l'utilisateur entre bien le bon nombre d'arguments
+		arguments := os.Args
+		if len(arguments) != 3 {
+			fmt.Println("Il faut les arguments adresse:port et chemin vers le fichier")
+			return
+		}
 
-			//On initie la connexion à l'adresse et au port entré
-			CONNECT := os.Args[1]
+		//On initie la connexion à l'adresse et au port entré
+		CONNECT := os.Args[1]
     	connection, err := net.Dial("tcp", CONNECT)
     	if err != nil {
         	fmt.Println("Error: ", err)
@@ -38,11 +38,7 @@ func main() {
 		sendFileToServer(connection)
 		receiveFileFromServer(connection)
 
-
-		//On lance une boucle infini
-		for {
-
-				}
+		
 }
 
 
@@ -60,8 +56,8 @@ func sendFileToServer(connection net.Conn) {
 			//On recupère l'objet de type image.Image
 			imgSrc, _, err := image.Decode(file)
 			if err != nil {
-	        panic(err.Error())
-	    }
+	        	panic(err.Error())
+		    }
 
 			fmt.Println("Traitement de l'image pour l'envoi...")
 			//On crée un objet image.RGBA à partir de l'objet image.Image
@@ -94,14 +90,14 @@ func receiveFileFromServer (connection net.Conn) {
 
 	// On crée un nouveau fichier ayant comme nom "gray" suivi du nom du fichier entré au début
 	newFileName := "gray" + os.Args[2]
-  newfile, err := os.Create(newFileName)
-  if err != nil {
-      panic(err.Error())
-  }
-  defer newfile.Close()
+  	newfile, err := os.Create(newFileName)
+  	if err != nil {
+  	    panic(err.Error())
+  	}
+ 	defer newfile.Close()
 
 	// On encode en PNG l'objet image.RGBA dans le fichier créé
-  png.Encode(newfile,tmpstruct.IMG)
+  	png.Encode(newfile,tmpstruct.IMG)
 
 	fmt.Println("Image recu")
 

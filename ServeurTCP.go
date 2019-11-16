@@ -5,11 +5,14 @@ import (
   "net"
   "os"
   "image"
+  "image/png"
+  "image/jpeg"
   "image/color"
   "encoding/gob"
   "time"
   "log"
   "sync"
+  "image/draw"
 )
 
 //création d'une structure de type imgStruct
@@ -47,20 +50,22 @@ func main() {
         defer l.Close()
 
         //On crée une boucle infini
+        numCustomer := 0
         for {
       		connection, err := l.Accept()
+          numCustomer += 1
       		if err != nil {
       			fmt.Println("Error: ", err)
       			os.Exit(1)
       		}
       		fmt.Println("Client Connecté")
           //On lance une goroutine pour intéragir avec le client
-      		go InteractClient(connection)
+      		go InteractClient(connection, numCustomer)
       	}
 
 }
 
-func InteractClient(connection net.Conn) {
+func InteractClient(connection net.Conn, numClient int) {
 
     inputChannel := make(chan job, GoRoutinesNbr)
 
@@ -73,7 +78,7 @@ func InteractClient(connection net.Conn) {
     //On récupère et décode la structure recu
     gobobj.Decode(tmpstruct)
 
-    fmt.Println("Image recu...")
+    fmt.Println("Image recu du client numéro : ", numClient)
 
     //On crée un objet image.RGBA vierge
     bounds := tmpstruct.IMG.Bounds()
@@ -112,7 +117,6 @@ func InteractClient(connection net.Conn) {
 
     fmt.Println("Image envoyer")
 
-
 }
 
 func TransformToGrey(jobChannel chan job){
@@ -120,7 +124,7 @@ func TransformToGrey(jobChannel chan job){
 
       job := <- jobChannel
       job.wg.Add(1)
-      fmt.Println("Ajout")
+      //fmt.Println("Ajout")
 
       for y := 0; y < job.h; y++ {
 
@@ -151,4 +155,32 @@ func giveJob(jobChannel chan job, wg *sync.WaitGroup, imgsrc *image.RGBA, imgdst
 
   wg.Done()
 
+}
+
+func unicorn(picture1 image.Image) {
+
+        image2, err1 := os.Open("licorne1.png")
+        if err1 != nil {
+          log.Fatalf("failed to open: %s", err1)
+        }
+        picture2, err := png.Decode(image2)
+        if err != nil {
+          log.Fatalf("failed to decode: %s", err)
+        }
+        defer image2.Close()
+
+        imgRef := picture1.Bounds()
+        imgLic := picture2.Bounds()
+        offset := image.Pt((imgRef.Max.X)/2 - (imgLic.Max.X)/2, (imgRef.Max.Y)/2 - (imgLic.Max.X)/2)
+        imgTmp := image.NewRGBA(imgRef)
+        draw.Draw(imgTmp, imgRef, picture1, image.ZP, draw.Src)
+        draw.Draw(imgTmp, imgLic.Add(offset), picture2, image.ZP, draw.Over)
+ 
+        imgResult ,err := os.Create("UnicornResult.jpg")
+        if err != nil {
+          log.Fatalf("failed to create: %s", err)
+        }
+
+        jpeg.Encode(imgResult, imgTmp, &jpeg.Options{jpeg.DefaultQuality})  
+        defer imgResult.Close()
 }
