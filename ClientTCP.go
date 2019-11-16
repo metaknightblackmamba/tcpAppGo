@@ -96,7 +96,7 @@ func receiveFileFromServer (connection net.Conn) {
 	gobDecoder.Decode(tmpstruct)
 
 	// On crée un nouveau fichier ayant comme nom "gray" suivi du nom du fichier entré au début
-	newFileName := "gray" + filepath.Base(os.Args[2]) + ".png"
+	newFileName := "gray" + filepath.Base(os.Args[2])
   	newfile, err := os.Create(newFileName)
   	if err != nil {
   	    panic(err.Error())
