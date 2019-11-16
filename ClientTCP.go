@@ -64,6 +64,7 @@ func sendFileToServer(connection net.Conn) {
 			imgSrc, _, err := image.Decode(file)
 			if err != nil {
 	        	panic(err.Error())
+						os.Exit(1)
 		    }
 
 			fmt.Println("Traitement de l'image pour l'envoi...")
