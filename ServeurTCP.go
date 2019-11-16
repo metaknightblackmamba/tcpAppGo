@@ -17,6 +17,7 @@ import (
 
 //création d'une structure de type imgStruct
 type imgStruct struct{
+  ORDER string
   IMG *image.RGBA
 }
 
@@ -92,9 +93,17 @@ func InteractClient(connection net.Conn, numClient int) {
     start := time.Now()
     var wg sync.WaitGroup
 
-    for channum := 0; channum < GoRoutinesNbr; channum++{
-        go TransformToGrey(inputChannel)
+    if(tmpstruct.ORDER == "gray"){
+      for channum := 0; channum < GoRoutinesNbr; channum++{
+          go TransformToGrey(inputChannel)
+      }
     }
+    if(tmpstruct.ORDER == "transparent"){
+      for channum := 0; channum < GoRoutinesNbr; channum++{
+          go TransformTransparent(inputChannel)
+      }
+    }
+
 
     wg.Add(1)
 
@@ -144,6 +153,32 @@ func TransformToGrey(jobChannel chan job){
     }
 }
 
+func TransformTransparent(jobChannel chan job){
+  for{
+
+      job := <- jobChannel
+      job.wg.Add(1)
+      //fmt.Println("Ajout")
+
+      for y := 0; y < job.h; y++ {
+
+          //On récupere l'objet de type color.Color correspondant aux coordonnés x,y de l'image
+          imageColor := job.imgsrc.At(job.x, y)
+          //On récupère les valeur Red Blue Green correspondant
+          red, green, blue, _ := imageColor.RGBA()
+          //On fait la moyenne de ces couleurs que l'on stocke dans mediumColor
+          if ((red == 65535) && (green == 65535) && (blue == 65535)) {
+        	col := color.RGBA{uint8(red>>8), uint8(green>>8), uint8(blue>>8), 0}
+        	job.imgdst.Set(job.x, y, col)
+        	} else {
+        		job.imgdst.Set(job.x, y, job.imgsrc.At(job.x, y))
+        	}
+
+        }
+      job.wg.Done()
+    }
+}
+
 func giveJob(jobChannel chan job, wg *sync.WaitGroup, imgsrc *image.RGBA, imgdst *image.RGBA, width int, height int){
 
   fmt.Println("GiveJob")
@@ -175,12 +210,12 @@ func unicorn(picture1 image.Image) {
         imgTmp := image.NewRGBA(imgRef)
         draw.Draw(imgTmp, imgRef, picture1, image.ZP, draw.Src)
         draw.Draw(imgTmp, imgLic.Add(offset), picture2, image.ZP, draw.Over)
- 
+
         imgResult ,err := os.Create("UnicornResult.jpg")
         if err != nil {
           log.Fatalf("failed to create: %s", err)
         }
 
-        jpeg.Encode(imgResult, imgTmp, &jpeg.Options{jpeg.DefaultQuality})  
+        jpeg.Encode(imgResult, imgTmp, &jpeg.Options{jpeg.DefaultQuality})
         defer imgResult.Close()
 }
