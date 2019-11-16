@@ -243,11 +243,11 @@ func draw_unicorn(picture1 *image.RGBA) {
         draw.Draw(picture1, imgRef, picture1, image.ZP, draw.Src)
         draw.Draw(picture1, imgLic.Add(offset), picture2, image.ZP, draw.Over)
 
-        imgResult ,err := os.Create("UnicornResult.png")
+        /*imgResult ,err := os.Create("UnicornResult.png")
         if err != nil {
           log.Fatalf("failed to create: %s", err)
         }
 
         png.Encode(imgResult, picture1)
-        defer imgResult.Close()
+        defer imgResult.Close()*/
 }

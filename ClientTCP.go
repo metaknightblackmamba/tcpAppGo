@@ -24,11 +24,11 @@ func main() {
 
 		//On vérifie que l'utilisateur entre bien le bon nombre d'arguments
 		if len(os.Args) != 4 {
-			fmt.Println("Il faut les arguments adresse:port et chemin vers le fichier")
+			fmt.Println("Il faut les arguments adresse:port chemin/vers/le/fichier grayscale|transparent|unicorn")
 			return
 		}
-		if(os.Args[3] != "gray" && os.Args[3] != "transparent" && os.Args[3] != "unicorn"){
-			fmt.Println("Seul gray, transparent et unicorn sont valide")
+		if(os.Args[3] != "grayscale" && os.Args[3] != "transparent" && os.Args[3] != "unicorn"){
+			fmt.Println("Seul grayscale, transparent et unicorn sont valide")
 			return
 		}
 
@@ -97,7 +97,7 @@ func receiveFileFromServer (connection net.Conn) {
 	gobDecoder.Decode(tmpstruct)
 
 	// On crée un nouveau fichier ayant comme nom "gray" suivi du nom du fichier entré au début
-	newFileName := "gray" + filepath.Base(os.Args[2]) + ".png"
+	newFileName := os.Args[3] + "_" + filepath.Base(os.Args[2]) + ".png"
   	newfile, err := os.Create(newFileName)
   	if err != nil {
   	    panic(err.Error())
