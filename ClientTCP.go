@@ -16,15 +16,19 @@ import (
 
 //création d'une structure de type imgStruct
 type imgStruct struct{
+	ORDER string
   IMG *image.RGBA
 }
 
 func main() {
 
 		//On vérifie que l'utilisateur entre bien le bon nombre d'arguments
-		arguments := os.Args
-		if len(arguments) != 3 {
+		if len(os.Args) != 4 {
 			fmt.Println("Il faut les arguments adresse:port et chemin vers le fichier")
+			return
+		}
+		if(os.Args[3] != "gray" && os.Args[3] != "transparent" && os.Args[3] != "unicorn"){
+			fmt.Println("Seul gray, transparent et unicorn sont valide")
 			return
 		}
 
@@ -69,7 +73,7 @@ func sendFileToServer(connection net.Conn) {
 			draw.Draw(imageToSend, imageToSend.Bounds(), imgSrc, bounds.Min, draw.Src)
 
 			//On stocke l'objet de type image.RGBA que l'on souhaite envoyé dans une nouvelle structure de type imgStruct
-			imageStruct := imgStruct{IMG: imageToSend}
+			imageStruct := imgStruct{ORDER: os.Args[3], IMG: imageToSend}
 
 			//On crée un objet de type Encoder pour envoyer la structure, le flux de sortie sera "connection"
 			gobEncoder := gob.NewEncoder(connection)
