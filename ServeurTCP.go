@@ -6,7 +6,6 @@ import (
   "os"
   "image"
   "image/png"
-  "image/jpeg"
   "image/color"
   "encoding/gob"
   "time"
@@ -86,6 +85,10 @@ func InteractClient(connection net.Conn, numClient int) {
     w, h := bounds.Max.X, bounds.Max.Y
     grayScale := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
 
+    if(tmpstruct.ORDER == "unicorn"){
+      draw_unicorn(grayScale)
+    }
+
     fmt.Println("Traitement de l'image")
 
     //On lance des goroutines "TransformToGrey" sur toute la largeur de l'image
@@ -101,6 +104,11 @@ func InteractClient(connection net.Conn, numClient int) {
     if(tmpstruct.ORDER == "transparent"){
       for channum := 0; channum < GoRoutinesNbr; channum++{
           go TransformTransparent(inputChannel)
+      }
+    }
+    if(tmpstruct.ORDER == "unicorn"){
+      for channum := 0; channum < GoRoutinesNbr; channum++{
+          go TransformFiligrane(inputChannel)
       }
     }
 
@@ -179,6 +187,30 @@ func TransformTransparent(jobChannel chan job){
     }
 }
 
+func TransformFiligrane(jobChannel chan job){
+  for{
+
+      job := <- jobChannel
+      job.wg.Add(1)
+      //fmt.Println("Ajout")
+
+      for y := 0; y < job.h; y++ {
+
+          //On récupere l'objet de type color.Color correspondant aux coordonnés x,y de l'image
+          imageColorSrc := job.imgsrc.At(job.x, y)
+          imageColorDst := job.imgdst.At(job.x, y)
+          //On récupère les valeur Red Blue Green correspondant
+          redSrc, greenSrc, blueSrc, a := imageColorSrc.RGBA()
+          redDst, greenDst, blueDst, _ := imageColorDst.RGBA()
+          //On fait la moyenne de ces couleurs que l'on stocke dans mediumColor
+        	col := color.RGBA{uint8((redSrc-redDst)>>8), uint8((greenSrc-greenDst)>>8), uint8((blueSrc-blueDst)>>8), uint8(a>>8)}
+        	job.imgdst.Set(job.x, y, col)
+
+        }
+      job.wg.Done()
+    }
+}
+
 func giveJob(jobChannel chan job, wg *sync.WaitGroup, imgsrc *image.RGBA, imgdst *image.RGBA, width int, height int){
 
   fmt.Println("GiveJob")
@@ -192,7 +224,7 @@ func giveJob(jobChannel chan job, wg *sync.WaitGroup, imgsrc *image.RGBA, imgdst
 
 }
 
-func unicorn(picture1 image.Image) {
+func draw_unicorn(picture1 *image.RGBA) {
 
         image2, err1 := os.Open("licorne1.png")
         if err1 != nil {
@@ -207,15 +239,15 @@ func unicorn(picture1 image.Image) {
         imgRef := picture1.Bounds()
         imgLic := picture2.Bounds()
         offset := image.Pt((imgRef.Max.X)/2 - (imgLic.Max.X)/2, (imgRef.Max.Y)/2 - (imgLic.Max.X)/2)
-        imgTmp := image.NewRGBA(imgRef)
-        draw.Draw(imgTmp, imgRef, picture1, image.ZP, draw.Src)
-        draw.Draw(imgTmp, imgLic.Add(offset), picture2, image.ZP, draw.Over)
+        //imgTmp := image.NewRGBA(imgRef)
+        draw.Draw(picture1, imgRef, picture1, image.ZP, draw.Src)
+        draw.Draw(picture1, imgLic.Add(offset), picture2, image.ZP, draw.Over)
 
-        imgResult ,err := os.Create("UnicornResult.jpg")
+        imgResult ,err := os.Create("UnicornResult.png")
         if err != nil {
           log.Fatalf("failed to create: %s", err)
         }
 
-        jpeg.Encode(imgResult, imgTmp, &jpeg.Options{jpeg.DefaultQuality})
+        png.Encode(imgResult, picture1)
         defer imgResult.Close()
 }
