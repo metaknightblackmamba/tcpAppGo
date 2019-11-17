@@ -96,7 +96,7 @@ func InteractClient(connection net.Conn, numClient int) {
     start := time.Now()
     var wg sync.WaitGroup
 
-    if(tmpstruct.ORDER == "gray"){
+    if(tmpstruct.ORDER == "grayscale"){
       for channum := 0; channum < GoRoutinesNbr; channum++{
           go TransformToGrey(inputChannel)
       }
