@@ -80,6 +80,7 @@ func InteractClient(connection net.Conn, numClient int) {
 
     fmt.Println("Image recu du client numéro : ", numClient)
 
+    //on vérifie si tmpstruct.IMG à bien été remplit
     if tmpstruct.IMG == nil {
       fmt.Printf("Erreur image recu")
       return
@@ -90,27 +91,31 @@ func InteractClient(connection net.Conn, numClient int) {
     w, h := bounds.Max.X, bounds.Max.Y
     grayScale := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
 
+    //Si on a recu 'unicorn' on souhaite dessiner la licorne au centre de l'image cible
     if(tmpstruct.ORDER == "unicorn"){
       draw_unicorn(grayScale)
     }
 
     fmt.Println("Traitement de l'image")
 
-    //On lance des goroutines "TransformToGrey" sur toute la largeur de l'image
 
     start := time.Now()
     var wg sync.WaitGroup
 
+    //On lance des goRoutines sur l'enssemble de la largeur de l'image selon la demande du Client
+    //Transformation en noir et blanc
     if(tmpstruct.ORDER == "grayscale"){
       for channum := 0; channum < GoRoutinesNbr; channum++{
           go TransformToGrey(inputChannel)
       }
     }
+    //Blanc vers alpha
     if(tmpstruct.ORDER == "transparent"){
       for channum := 0; channum < GoRoutinesNbr; channum++{
           go TransformTransparent(inputChannel)
       }
     }
+    //Filigrane sur l'image cible
     if(tmpstruct.ORDER == "unicorn"){
       for channum := 0; channum < GoRoutinesNbr; channum++{
           go TransformFiligrane(inputChannel)
@@ -125,7 +130,6 @@ func InteractClient(connection net.Conn, numClient int) {
     wg.Wait()
 
     fmt.Println("Wait")
-    //wg.Wait()
 
     elapsed := time.Since(start)
     log.Printf("Traitement took %s", elapsed)
@@ -146,7 +150,6 @@ func TransformToGrey(jobChannel chan job){
 
       job := <- jobChannel
       job.wg.Add(1)
-      //fmt.Println("Ajout")
 
       for y := 0; y < job.h; y++ {
 
@@ -171,7 +174,6 @@ func TransformTransparent(jobChannel chan job){
 
       job := <- jobChannel
       job.wg.Add(1)
-      //fmt.Println("Ajout")
 
       for y := 0; y < job.h; y++ {
 
@@ -197,7 +199,6 @@ func TransformFiligrane(jobChannel chan job){
 
       job := <- jobChannel
       job.wg.Add(1)
-      //fmt.Println("Ajout")
 
       for y := 0; y < job.h; y++ {
 
@@ -231,29 +232,28 @@ func giveJob(jobChannel chan job, wg *sync.WaitGroup, imgsrc *image.RGBA, imgdst
 
 func draw_unicorn(picture1 *image.RGBA) {
 
+        //Ouverture de l'image que l'on souhaite avoir en filigrane
         image2, err1 := os.Open("licorne1.png")
         if err1 != nil {
-          log.Fatalf("failed to open: %s", err1)
+          fmt.Println("failed to open: %s", err1)
+          return
         }
         picture2, err := png.Decode(image2)
         if err != nil {
-          log.Fatalf("failed to decode: %s", err)
+          fmt.Println("failed to decode: %s", err)
+          return
         }
         defer image2.Close()
 
         imgRef := picture1.Bounds()
         imgLic := picture2.Bounds()
+        //On crée l'offset, le centre de l'image de destination
         offset := image.Pt((imgRef.Max.X)/2 - (imgLic.Max.X)/2, (imgRef.Max.Y)/2 - (imgLic.Max.X)/2)
-        //imgTmp := image.NewRGBA(imgRef)
+
+        //On remplit l'image de destination en blanc
         draw.Draw(picture1, picture1.Bounds(), &image.Uniform{color.White}, image.ZP, draw.Src)
+        //On dessine une image au centre de l'image de destination
         draw.Draw(picture1, imgRef, picture1, image.ZP, draw.Src)
         draw.Draw(picture1, imgLic.Add(offset), picture2, image.ZP, draw.Over)
 
-        /*imgResult ,err := os.Create("UnicornResult.png")
-        if err != nil {
-          log.Fatalf("failed to create: %s", err)
-        }
-
-        png.Encode(imgResult, picture1)
-        defer imgResult.Close()*/
 }
