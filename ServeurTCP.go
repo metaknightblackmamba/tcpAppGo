@@ -56,7 +56,7 @@ func main() {
           numCustomer += 1
       		if err != nil {
       			fmt.Println("Error: ", err)
-      			os.Exit(1)
+      			//os.Exit(1)
       		}
       		fmt.Println("Client Connecté")
           //On lance une goroutine pour intéragir avec le client
@@ -79,6 +79,11 @@ func InteractClient(connection net.Conn, numClient int) {
     gobobj.Decode(tmpstruct)
 
     fmt.Println("Image recu du client numéro : ", numClient)
+
+    if tmpstruct.IMG == nil {
+      fmt.Printf("Erreur image recu")
+      return
+    }
 
     //On crée un objet image.RGBA vierge
     bounds := tmpstruct.IMG.Bounds()
@@ -203,7 +208,7 @@ func TransformFiligrane(jobChannel chan job){
           redSrc, greenSrc, blueSrc, a := imageColorSrc.RGBA()
           redDst, greenDst, blueDst, _ := imageColorDst.RGBA()
           //On fait la moyenne de ces couleurs que l'on stocke dans mediumColor
-        	col := color.RGBA{uint8((redSrc-redDst)>>8), uint8((greenSrc-greenDst)>>8), uint8((blueSrc-blueDst)>>8), uint8(a>>8)}
+        	col := color.RGBA{uint8((redSrc*(redDst))/65535>>8), uint8((greenSrc*(greenDst))/65535>>8), uint8((blueSrc*(blueDst))/65535>>8), uint8(a>>8)}
         	job.imgdst.Set(job.x, y, col)
 
         }
@@ -240,6 +245,7 @@ func draw_unicorn(picture1 *image.RGBA) {
         imgLic := picture2.Bounds()
         offset := image.Pt((imgRef.Max.X)/2 - (imgLic.Max.X)/2, (imgRef.Max.Y)/2 - (imgLic.Max.X)/2)
         //imgTmp := image.NewRGBA(imgRef)
+        draw.Draw(picture1, picture1.Bounds(), &image.Uniform{color.White}, image.ZP, draw.Src)
         draw.Draw(picture1, imgRef, picture1, image.ZP, draw.Src)
         draw.Draw(picture1, imgLic.Add(offset), picture2, image.ZP, draw.Over)
 
