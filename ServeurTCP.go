@@ -50,22 +50,20 @@ func main() {
         defer l.Close()
 
         //On crée une boucle infini
-        numCustomer := 0
         for {
       		connection, err := l.Accept()
-          numCustomer += 1
       		if err != nil {
       			fmt.Println("Error: ", err)
       			//os.Exit(1)
       		}
       		fmt.Println("Client Connecté")
           //On lance une goroutine pour intéragir avec le client
-      		go InteractClient(connection, numCustomer)
+      		go InteractClient(connection)
       	}
 
 }
 
-func InteractClient(connection net.Conn, numClient int) {
+func InteractClient(connection net.Conn) {
 
     inputChannel := make(chan job, GoRoutinesNbr)
 
@@ -78,7 +76,7 @@ func InteractClient(connection net.Conn, numClient int) {
     //On récupère et décode la structure recu
     gobobj.Decode(tmpstruct)
 
-    fmt.Println("Image recu du client numéro : ", numClient)
+    fmt.Println("Image recu...")
 
     //on vérifie si tmpstruct.IMG à bien été remplit
     if tmpstruct.IMG == nil {
