@@ -20,6 +20,7 @@ type imgStruct struct{
   IMG *image.RGBA
 }
 
+//création d'une structure de type job pour transmettre les instructions aux goRoutines
 type job struct{
   x int
   h int
@@ -28,6 +29,7 @@ type job struct{
   wg *sync.WaitGroup
 }
 
+// Constante pour le nombre de Goroutine disponible
 const GoRoutinesNbr int = 1000
 
 
@@ -54,7 +56,6 @@ func main() {
       		connection, err := l.Accept()
       		if err != nil {
       			fmt.Println("Error: ", err)
-      			//os.Exit(1)
       		}
       		fmt.Println("Client Connecté")
           //On lance une goroutine pour intéragir avec le client
@@ -123,6 +124,7 @@ func InteractClient(connection net.Conn) {
 
     wg.Add(1)
 
+    //Lance une GoRoutine qui donnera les instruction à travers le channel 'inputChannel'
     go giveJob(inputChannel, &wg, tmpstruct.IMG, grayScale, w, h)
 
     wg.Wait()
@@ -131,6 +133,7 @@ func InteractClient(connection net.Conn) {
 
     elapsed := time.Since(start)
     log.Printf("Traitement took %s", elapsed)
+    
     //On stocke l'objet de type image.RGBA que l'on souhaite envoyé dans une nouvelle structure de type imgStruct
     imageStruct := imgStruct{IMG: grayScale}
 
@@ -146,7 +149,9 @@ func InteractClient(connection net.Conn) {
 func TransformToGrey(jobChannel chan job){
   for{
 
+      //Reception d'une structure du jobChannel
       job := <- jobChannel
+      //Ajout 1 au WaitGroup
       job.wg.Add(1)
 
       for y := 0; y < job.h; y++ {
@@ -170,7 +175,9 @@ func TransformToGrey(jobChannel chan job){
 func TransformTransparent(jobChannel chan job){
   for{
 
+      //Reception d'une structure du jobChannel
       job := <- jobChannel
+      //Ajout 1 au WaitGroup
       job.wg.Add(1)
 
       for y := 0; y < job.h; y++ {
