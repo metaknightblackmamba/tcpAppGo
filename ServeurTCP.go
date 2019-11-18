@@ -18,6 +18,7 @@ import (
 type imgStruct struct{
   //Commande du Client à affecter à l'image
   ORDER string
+  //Image de type image.RGBA evnoyé par le client
   IMG *image.RGBA
 }
 
