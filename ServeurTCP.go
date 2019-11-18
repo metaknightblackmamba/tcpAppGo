@@ -16,6 +16,7 @@ import (
 
 //création d'une structure de type imgStruct
 type imgStruct struct{
+  //Commande du Client à affecter à l'image
   ORDER string
   IMG *image.RGBA
 }
@@ -133,7 +134,7 @@ func InteractClient(connection net.Conn) {
 
     elapsed := time.Since(start)
     log.Printf("Traitement took %s", elapsed)
-    
+
     //On stocke l'objet de type image.RGBA que l'on souhaite envoyé dans une nouvelle structure de type imgStruct
     imageStruct := imgStruct{IMG: grayScale}
 
