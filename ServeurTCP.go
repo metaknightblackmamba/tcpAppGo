@@ -83,7 +83,7 @@ func InteractClient(connection net.Conn) {
 
     //on vérifie si tmpstruct.IMG à bien été remplit
     if tmpstruct.IMG == nil {
-      fmt.Printf("Erreur image recu")
+      fmt.Printf("Erreur image reçue")
       return
     }
 
@@ -144,7 +144,7 @@ func InteractClient(connection net.Conn) {
     //On encode et envoi la structure
     gobEncoder.Encode(imageStruct)
 
-    fmt.Println("Image envoyer")
+    fmt.Println("Image envoyée")
 
 }
 

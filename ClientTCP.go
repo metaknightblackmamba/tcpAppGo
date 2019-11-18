@@ -82,7 +82,7 @@ func sendFileToServer(connection net.Conn) {
 			gobEncoder := gob.NewEncoder(connection)
 			//On encode et envoi la structure
 			gobEncoder.Encode(imageStruct)
-			fmt.Println("Image envoyer")
+			fmt.Println("Image envoyée")
 
 
 }
@@ -109,7 +109,7 @@ func receiveFileFromServer (connection net.Conn) {
 	// On encode en PNG l'objet image.RGBA dans le fichier créé
   	png.Encode(newfile,tmpstruct.IMG)
 
-	fmt.Println("Image recu")
+	fmt.Println("Image reçue")
 
 
 }
