@@ -58,6 +58,7 @@ func main() {
       		connection, err := l.Accept()
       		if err != nil {
       			fmt.Println("Error: ", err)
+            continue
       		}
       		fmt.Println("Client Connecté")
           //On lance une goroutine pour intéragir avec le client
